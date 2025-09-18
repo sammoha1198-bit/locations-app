@@ -565,20 +565,51 @@
       html+=`<div class='mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3'><div class='card p-3'><div class='text-xs text-slate-500'>مجموع ساعات عمل المولدات</div><div class='text-xl font-extrabold'>${hrs.toFixed(1)} ساعة</div></div><div class='card p-3'><div class='text-xs text-slate-500'>كميات الزيوت المستهلكة</div><div class='text-xl font-extrabold'>${oil.toFixed(2)} لتر</div></div></div>`;
       document.getElementById('summaryBox').innerHTML=html;
     }
-    async function exportExcel(kind){
-      const month=document.getElementById('monthPicker').value;
-      if(!month){alert('اختر شهرًا'); return;}
-      await syncAll();
-      const res=await fetch(`/export/${kind}?month=${encodeURIComponent(month)}`);
-      if(!res.ok){ const msg=await res.text(); alert('فشل التصدير: '+msg); return; }
-      const blob=await res.blob();
+
+  function isMobileDirectDownloadNeeded(){
+    const ua = navigator.userAgent || navigator.vendor || window.opera;
+    const iOS = /iPad|iPhone|iPod/.test(ua);
+    const isAndroid = /Android/.test(ua);
+    const isMobile = iOS || isAndroid;
+    const isSafari = /^((?!chrome|android).)*safari/i.test(ua);
+    // open link directly on mobile (most reliable)
+    return isMobile && (isSafari || true);
+  }
+
+  async function exportExcel(kind){
+    const month=document.getElementById('monthPicker').value;
+    if(!month){alert('اختر شهرًا'); return;}
+    await syncAll();
+
+    const url = `/export/${kind}?month=${encodeURIComponent(month)}`;
+
+    // Mobile: open the URL directly so the browser handles the download natively
+    if (isMobileDirectDownloadNeeded()){
       const a=document.createElement('a');
-      a.href=URL.createObjectURL(blob);
-      a.download = `${kind}-${month}.xlsx`;
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener';
       document.body.appendChild(a);
       a.click();
       a.remove();
+      return;
     }
+
+    // Desktop: keep the old blob method
+    const res=await fetch(url);
+    if(!res.ok){
+      const msg=await res.text();
+      alert('فشل التصدير: '+msg);
+      return;
+    }
+    const blob=await res.blob();
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download = `${kind}-${month}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
 
     document.addEventListener('DOMContentLoaded', async ()=>{
       await loadSites(); initDates();
