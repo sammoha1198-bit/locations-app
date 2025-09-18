@@ -1,0 +1,42 @@
+{
+  "works": [
+    {
+      "date": "2025-09-15",
+      "region": "الأمانة",
+      "site": "عصر-2",
+      "siteOwner": "تبعية افتراضية",
+      "jobType": "صيانة دورية",
+      "summary": "فحص وتشحيم واستبدال زيت",
+      "oilLiters": 8,
+      "oilFilter": true,
+      "dieselFilter": false,
+      "airFilter": true,
+      "hoursNow": 1250,
+      "hoursDiff": 12,
+      "l1": 18,
+      "l2": 17,
+      "l3": 19,
+      "kwhNow": 3456,
+      "executor": "الفني أحمد",
+      "driver": "السائق سامي",
+      "notes": "تمت الصيانة بنجاح",
+      "grid": { "etype": "عمومي", "kwhPrev": 3400, "kwhNow": 3456, "kwhDiff": 56, "kwhr": 12, "hours": 10 },
+      "spares": [
+        { "name": "عد السيور", "qty": 1 },
+        { "name": "فلتر زيت", "qty": 1 }
+      ]
+    }
+  ],
+  "emergencies": [
+    {
+      "date": "2025-09-15",
+      "region": "الأمانة",
+      "site": "عصر-2",
+      "etype": "عمومي",
+      "alarm": "إنذار حرارة",
+      "source": "المراقبة",
+      "category": "مشاكل فنية",
+      "notes": "تم التعامل مع البلاغ"
+    }
+  ]
+}

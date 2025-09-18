@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>نظام الصيانة الميدانية</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: { fontFamily:{arabic:['Tajawal','ui-sans-serif','system-ui']}, colors:{ burgundy:{600:'#9a184b',700:'#7c123c',800:'#5f0d2e'}, mint:{100:'#e7fff5',600:'#22a97a'} } } } };
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    html,body{background:#f6f8fb}
+    .card{background:#fff; border:1px solid #e5e7eb; box-shadow:0 8px 28px rgba(2,6,23,.06); border-radius:18px}
+    .card-btn{cursor:pointer; user-select:none}
+    .card-btn:active{transform:scale(.98)}
+    .input{width:100%; margin-top:.25rem; border:1px solid #e5e7eb; border-radius:14px; padding:.7rem .9rem}
+    .label{color:#334155; font-size:.875rem}
+  </style>
+</head>
+<body class="font-arabic text-slate-900">
+  <header class="relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-b from-burgundy-600 to-burgundy-800"></div>
+    <div class="relative max-w-3xl mx-auto px-4 py-6 text-white">
+      <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-extrabold">نظام الصيانة الميدانية</h1>
+        <span class="text-sm opacity-90">إصدار تجريبي</span>
+      </div>
+      <p class="mt-1 opacity-90">واجهة جوّال + تصدير إكسل</p>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-3 py-5 space-y-5">
+    <section class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <button type="button" class="card card-btn p-5 text-right hover:shadow-lg transition" onclick="showSection('form-work')"><div class="text-xs text-slate-500">إدخال</div><div class="text-xl font-extrabold">تسجيل مهمة</div></button>
+      <button type="button" class="card card-btn p-5 text-right hover:shadow-lg transition" onclick="showSection('form-emergency')"><div class="text-xs text-slate-500">إدخال</div><div class="text-xl font-extrabold">صيانة طارئة</div></button>
+      <button type="button" class="card card-btn p-5 text-right hover:shadow-lg transition" onclick="showSection('form-grid')"><div class="text-xs text-slate-500">إدخال</div><div class="text-xl font-extrabold">بيانات العمومي/التجاري</div></button>
+      <button type="button" class="card card-btn p-5 text-right hover:shadow-lg transition" onclick="showSection('report-month')"><div class="text-xs text-slate-500">تقرير</div><div class="text-xl font-extrabold">ملخص شهري</div></button>
+    </section>
+
+    <section id="form-work" class="card p-4 hidden">
+      <h2 class="text-lg font-extrabold mb-3">تسجيل مهمة</h2>
+      <form id="workForm" class="space-y-4" onsubmit="saveWork(event)">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div><label class="label">التاريخ</label><input id="date" type="date" class="input"/></div>
+          <div><label class="label">اليوم</label><input id="weekday" class="input bg-slate-50" readonly/></div>
+          <div><label class="label">المنطقة</label>
+            <select id="region" class="input"><option value="">— اختر —</option><option>الأمانة</option><option>صنعاء</option><option>عمران</option><option>مأرب</option></select>
+          </div>
+          <div><label class="label">الموقع</label><input id="site" class="input" placeholder="اسم الموقع"/></div>
+          <div><label class="label">تبعية الموقع</label><input id="siteOwner" list="ownerList" class="input" placeholder="حكومي / تجاري / خاص" /><datalist id="ownerList"><option value="حكومي"/><option value="تجاري"/><option value="خاص"/><option value="الأمانة"/></datalist></div>
+          <div><label class="label">نوع العمل</label>
+            <select id="jobType" class="input">
+              <option value="">— اختر —</option>
+              <option>أخذ القراءات</option><option>أخرى</option><option>إصلاحات</option><option>تكليف عمل</option>
+              <option>ربط كهرباء</option><option>صيانة تفقدية</option><option>صيانة دورية</option><option>صيانة طارئة</option>
+              <option>فحص</option><option>مواد</option>
+            </select>
+          </div>
+          <div class="sm:col-span-2"><label class="label">العمل المنجز (ملخص فقط)</label><textarea id="summary" rows="2" class="input"></textarea></div>
+        </div>
+
+        <div>
+          <h3 class="font-bold mb-2">كميات الزيت والفلاتر</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div><label class="label">الزيت (لتر)</label><input id="oilLiters" type="number" step="0.01" min="0" class="input"/></div>
+            <div class="flex flex-wrap gap-4 pt-2">
+              <label class="inline-flex items-center gap-2"><input id="oilFilter" type="checkbox"> <span>فلتر الزيت</span></label>
+              <label class="inline-flex items-center gap-2"><input id="dieselFilter" type="checkbox"> <span>فلتر الديزل</span></label>
+              <label class="inline-flex items-center gap-2"><input id="airFilter" type="checkbox"> <span>فلتر الهواء</span></label>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="font-bold mb-2">القراءات وبيانات الأحمال على المولد</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div><label class="label">عداد الساعات (حالي)</label><input id="hoursNow" type="number" step="0.1" min="0" class="input"/></div>
+            <div><label class="label">فارق القراءة (تغيير الزيت)</label><input id="hoursDiff" class="input bg-slate-50" readonly/></div>
+            <div><label class="label">L1 (A)</label><input id="l1" type="number" step="0.1" min="0" class="input"/></div>
+            <div><label class="label">L2 (A)</label><input id="l2" type="number" step="0.1" min="0" class="input"/></div>
+            <div><label class="label">L3 (A)</label><input id="l3" type="number" step="0.1" min="0" class="input"/></div>
+            <div><label class="label">KWh (حالي)</label><input id="kwhNow" type="number" step="0.01" min="0" class="input"/></div>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="font-bold mb-2">قطع غيار مستخدمة</h3>
+          <div id="spares" class="space-y-2"></div>
+          <button type="button" class="px-3 py-2 border rounded-lg" onclick="addSpare()">+ إضافة قطعة</button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div><label class="label">المنفذ للعمل</label><input id="executor" class="input"/></div>
+          <div><label class="label">السائق</label><input id="driver" class="input"/></div>
+        </div>
+
+        <div><label class="label">ملاحظات</label><textarea id="notes" rows="2" class="input"></textarea></div>
+
+        <div class="flex justify-between items-center pt-2">
+          <div class="text-xs text-slate-500">* اليوم/التاريخ يُحتسب تلقائياً</div>
+          <button class="px-4 py-3 rounded-xl bg-burgundy-600 text-white font-extrabold" type="submit">حفظ المهمة</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="form-emergency" class="card p-4 hidden">
+      <h2 class="text-lg font-extrabold mb-3">صيانة طارئة</h2>
+      <form id="emForm" class="space-y-4" onsubmit="saveEmergency(event)">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div><label class="label">التاريخ</label><input id="emDate" type="date" class="input"/></div>
+          <div><label class="label">المنطقة</label>
+            <select id="emRegion" class="input"><option value="">— اختر —</option><option>الأمانة</option><option>صنعاء</option><option>عمران</option><option>مأرب</option></select>
+          </div>
+          <div><label class="label">الموقع</label><input id="emSite" class="input"/></div>
+          <div><label class="label">تبعية الموقع</label><input id="emSiteOwner" list="ownerList" class="input" placeholder="حكومي / تجاري / خاص"/></div>
+          <div><label class="label">الإنذار</label>
+            <select id="alarm" class="input"><option value="">— اختر —</option><option>AC Power Off</option><option>المراقبة</option><option>خروج عن الخدمة</option></select>
+          </div>
+          <div><label class="label">مصدر البلاغ</label>
+            <select id="source" class="input"><option value="">— اختر —</option><option>المراقبة</option><option>مشاكل فنية</option><option>أخرى</option></select>
+          </div>
+          <div><label class="label">تصنيف المشكلة</label>
+            <select id="category" class="input"><option value="">— اختر —</option><option>كهرباء عمومي</option><option>مشاكل فنية</option><option>تجاري</option></select>
+          </div>
+          <div class="sm:col-span-2"><label class="label">ملاحظات</label><textarea id="emNotes" rows="2" class="input"></textarea></div>
+        </div>
+        <div class="flex justify-end"><button class="px-4 py-3 rounded-xl bg-burgundy-600 text-white font-extrabold" type="submit">حفظ البلاغ</button></div>
+      </form>
+    </section>
+
+    <section id="form-grid" class="card p-4 hidden">
+      <h2 class="text-lg font-extrabold mb-3">بيانات العمومي/التجاري</h2>
+      <form id="gridForm" class="space-y-4" onsubmit="saveGrid(event)">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div><label class="label">التاريخ</label><input id="gridDate" type="date" class="input"/></div>
+          <div><label class="label">المنطقة</label>
+            <select id="gridRegion" class="input"><option value="">— اختر —</option><option>الأمانة</option><option>صنعاء</option><option>عمران</option><option>مأرب</option></select>
+          </div>
+          <div><label class="label">الموقع</label><input id="gridSite" class="input"/></div>
+          <div><label class="label">تبعية الموقع</label><input id="gridSiteOwner" list="ownerList" class="input" placeholder="حكومي / تجاري / خاص"/></div>
+          <div><label class="label">النوع</label>
+            <select id="gridType" class="input"><option value="">— اختر —</option><option>تجاري</option><option>عمومي</option></select>
+          </div>
+          <div><label class="label">عداد الكهرباء (KWh) - السابقة</label><input id="gridKwhPrev" class="input bg-slate-50" readonly/></div>
+          <div><label class="label">عداد الكهرباء (KWh) - الحالية</label><input id="gridKwhNow" type="number" step="0.01" min="0" class="input"/></div>
+          <div><label class="label">kWhr (اختياري)</label><input id="gridKwhr" type="number" step="0.01" min="0" class="input"/></div>
+          <div><label class="label">عداد ساعات الكهرباء</label><input id="gridHours" type="number" step="0.1" min="0" class="input"/></div>
+          <div><label class="label">الاستهلاك (KWh) - محسوب</label><input id="gridKwhDiff" class="input bg-slate-50" readonly/></div>
+        </div>
+        <div class="flex flex-wrap gap-2 justify-end">
+          <button type="button" class="px-3 py-2 border rounded-xl" onclick="syncToServer()">مزامنة البيانات للخادم</button>
+          <button class="px-4 py-3 rounded-xl bg-burgundy-600 text-white font-extrabold" type="submit">حفظ</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="report-month" class="card p-4 hidden">
+      <h2 class="text-lg font-extrabold mb-3">ملخص شهري</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div><label class="label">الشهر</label><input id="monthPicker" type="month" class="input"/></div>
+        <div class="flex items-end gap-2">
+          <button class="px-3 py-2 border rounded-xl" type="button" onclick="buildLocalSummary()">تحديث الملخص</button>
+          <button class="px-3 py-2 rounded-xl bg-mint-600 text-white" type="button" onclick="exportExcel('detail')">تصدير التفصيلي</button>
+          <button class="px-3 py-2 rounded-xl bg-mint-600 text-white" type="button" onclick="exportExcel('summary')">تصدير ملخص الصيانة</button>
+          <button class="px-3 py-2 rounded-xl bg-mint-600 text-white" type="button" onclick="exportExcel('spares')">تصدير قطع/مواد</button>
+        </div>
+      </div>
+      <div id="summaryBox" class="mt-4 text-sm"></div>
+      <p class="text-xs text-slate-500 mt-3">* أزرار التصدير تحتاج تشغيل الخادم ثم مزامنة البيانات.</p>
+    </section>
+  </main>
+
+  <script>
+    const weekdayNames=['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+    function showSection(id){document.querySelectorAll('main section.card').forEach(s=>s.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'});}
+    function todayISO(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+    function setAutoDate(){['date','emDate','gridDate'].forEach(id=>{const el=document.getElementById(id);if(el && !el.value) el.value=todayISO();});const w=weekdayNames[new Date().getDay()];const we=document.getElementById('weekday');if(we) we.value=w;}
+    const DB={works:JSON.parse(localStorage.getItem('works')||'[]'),emergencies:JSON.parse(localStorage.getItem('emergencies')||'[]'),grid:JSON.parse(localStorage.getItem('grid')||'[]'),lastHoursBySite:JSON.parse(localStorage.getItem('lastHoursBySite')||'{}'),lastKwhBySiteType:JSON.parse(localStorage.getItem('lastKwhBySiteType')||'{}')};
+    function persist(){localStorage.setItem('works',JSON.stringify(DB.works));localStorage.setItem('emergencies',JSON.stringify(DB.emergencies));localStorage.setItem('grid',JSON.stringify(DB.grid));localStorage.setItem('lastHoursBySite',JSON.stringify(DB.lastHoursBySite));localStorage.setItem('lastKwhBySiteType',JSON.stringify(DB.lastKwhBySiteType));}
+    function addSpare(){const wrap=document.getElementById('spares');const row=document.createElement('div');row.className='grid grid-cols-3 gap-2';row.innerHTML=`<input placeholder="اسم القطعة" class="input"><input type="number" min="0" step="1" placeholder="الكمية" class="input"><button type="button" class="px-3 py-2 border rounded-lg" onclick="this.parentElement.remove()">حذف</button>`;wrap.appendChild(row);}
+    function saveWork(e){e.preventDefault();const site=document.getElementById('site').value.trim();const hoursNow=parseFloat(document.getElementById('hoursNow').value||0);const last=Number(DB.lastHoursBySite[site]||0);if(hoursNow<last){alert('قراءة عداد الساعات الحالية أقل من السابقة لهذا الموقع');return;}const diff=Math.max(0,hoursNow-last);document.getElementById('hoursDiff').value=diff.toFixed(1);const spares=[...document.querySelectorAll('#spares > div')].map(d=>({name:d.children[0].value.trim(),qty:Number(d.children[1].value||0)})).filter(x=>x.name);const item={date:document.getElementById('date').value,weekday:document.getElementById('weekday').value,region:document.getElementById('region').value,site,siteOwner:document.getElementById('siteOwner').value,jobType:document.getElementById('jobType').value,summary:document.getElementById('summary').value,oilLiters:Number(document.getElementById('oilLiters').value||0),oilFilter:document.getElementById('oilFilter').checked,dieselFilter:document.getElementById('dieselFilter').checked,airFilter:document.getElementById('airFilter').checked,hoursNow, hoursDiff:diff,l1:Number(document.getElementById('l1').value||0),l2:Number(document.getElementById('l2').value||0),l3:Number(document.getElementById('l3').value||0),kwhNow:Number(document.getElementById('kwhNow').value||0),spares,executor:document.getElementById('executor').value,driver:document.getElementById('driver').value,notes:document.getElementById('notes').value,savedAt:new Date().toISOString()};if(!item.region || !item.site || !item.jobType){alert('الرجاء تعبئة المنطقة والموقع ونوع العمل');return;}DB.works.push(item);DB.lastHoursBySite[site]=hoursNow;persist();alert('تم حفظ المهمة');document.getElementById('workForm').reset();setAutoDate();document.getElementById('spares').innerHTML='';}
+    function keySiteType(site,typ){return `${site}__${typ}`}
+    function updateGridPrev(){const site=document.getElementById('gridSite').value.trim();const typ=document.getElementById('gridType').value;const prevEl=document.getElementById('gridKwhPrev');if(!site || !typ){prevEl.value='';return;}const key=keySiteType(site,typ);let prev=DB.lastKwhBySiteType[key];if(prev===undefined){const items=DB.grid.filter(g=>g.site===site && g.etype===typ);if(items.length){items.sort((a,b)=> new Date(b.date||b.savedAt||0) - new Date(a.date||a.savedAt||0));prev=items[0].kwhNow || 0;}else prev=0;}prevEl.value=Number(prev||0).toFixed(2);const now=Number(document.getElementById('gridKwhNow').value||0);document.getElementById('gridKwhDiff').value=Math.max(0,now-Number(prev||0)).toFixed(2);}
+    function saveGrid(e){e.preventDefault();const site=document.getElementById('gridSite').value.trim();const typ=document.getElementById('gridType').value;const prev=Number(document.getElementById('gridKwhPrev').value||0);const kwhNow=Number(document.getElementById('gridKwhNow').value||0);if(!document.getElementById('gridRegion').value || !site || !typ){alert('الرجاء تعبئة المنطقة والموقع والنوع');return;}if(kwhNow<prev){alert('قراءة KWh الحالية أقل من السابقة لهذا الموقع/النوع');return;}const diff=Math.max(0,kwhNow-prev);document.getElementById('gridKwhDiff').value=diff.toFixed(2);const item={date:document.getElementById('gridDate').value,region:document.getElementById('gridRegion').value,site,siteOwner:document.getElementById('gridSiteOwner').value,etype:typ,kwhPrev:prev,kwhNow,kwhr:Number(document.getElementById('gridKwhr').value||0),hours:Number(document.getElementById('gridHours').value||0),kwhDiff:diff,savedAt:new Date().toISOString()};DB.grid.push(item);DB.lastKwhBySiteType[keySiteType(site,typ)]=kwhNow;persist();alert('تم حفظ بيانات العمومي/التجاري');document.getElementById('gridForm').reset();setAutoDate();}
+    function onGridChange(){updateGridPrev()}
+    function ym(s){return (s||'').slice(0,7)}
+    function buildLocalSummary(){const m=document.getElementById('monthPicker').value;if(!m){alert('اختر شهرًا');return;}const works=DB.works.filter(x=>ym(x.date)===m);const byRegion=['الأمانة','صنعاء','عمران','مأرب'];const jobTypes=['صيانة مخططة','صيانة دورية','صيانة طارئة','صيانة تفقدية','استلام طوارئ','تعطيل','استلام وتشغيل','ترحيل إنذارات','ربط كهرباء','قراءة عدادات','تكليف عمل','مواد','إصلاحات','أخرى','أخذ القراءات','فحص'];const table={};jobTypes.forEach(j=>{table[j]={total:0};byRegion.forEach(r=>table[j][r]=0)});works.forEach(w=>{const j=w.jobType||'أخرى';const r=byRegion.includes(w.region)?w.region:'الأمانة';table[j].total++;table[j][r]++;});const oil=works.reduce((a,b)=>a+Number(b.oilLiters||0),0);const hrs=works.reduce((a,b)=>a+Number(b.hoursDiff||0),0);let html=`<div class='mb-2 font-bold'>ملخص أعمال الصيانة لشهر ${m}</div>`;html+=`<div class='overflow-auto'><table class='min-w-full text-sm border border-slate-200'><thead><tr class='bg-mint-100'><th class='p-2 border'>المهام</th><th class='p-2 border'>الكل</th>${byRegion.map(r=>`<th class='p-2 border'>${r}</th>`).join('')}</tr></thead><tbody>`;Object.keys(table).forEach(j=>{const r=table[j];html+=`<tr><td class='p-2 border'>${j}</td><td class='p-2 border text-center'>${r.total}</td>${byRegion.map(x=>`<td class='p-2 border text-center'>${r[x]}</td>`).join('')}</tr>`});html+=`</tbody></table></div>`;html+=`<div class='mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3'><div class='card p-3'><div class='text-xs text-slate-500'>مجموع ساعات عمل المولدات</div><div class='text-xl font-extrabold'>${hrs.toFixed(1)} ساعة</div></div><div class='card p-3'><div class='text-xs text-slate-500'>كميات الزيوت المستهلكة</div><div class='text-xl font-extrabold'>${oil.toFixed(2)} لتر</div></div></div>`;document.getElementById('summaryBox').innerHTML=html;}
+    async function exportExcel(kind){const month=document.getElementById('monthPicker').value;if(!month){alert('اختر شهرًا');return;}const res=await fetch(`/export/${kind}?month=${encodeURIComponent(month)}`);if(!res.ok){alert('فشل التصدير (تأكد أن الخادم يعمل وأنك قمت بالمزامنة)');return;}const blob=await res.blob();const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`${kind}-${month}.xlsx`;document.body.appendChild(a);a.click();a.remove();}
+    async function syncToServer(){try{const payload={works:DB.works,emergencies:DB.emergencies,grid:DB.grid};const res=await fetch('/import',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});if(!res.ok) throw new Error('HTTP '+res.status);alert('تمت مزامنة البيانات مع الخادم');}catch(e){alert('تعذر المزامنة: '+e.message);}}
+    document.addEventListener('DOMContentLoaded',()=>{setAutoDate();showSection('form-work');document.getElementById('gridSite').addEventListener('change',onGridChange);document.getElementById('gridType').addEventListener('change',onGridChange);document.getElementById('gridKwhNow').addEventListener('input',()=>{const prev=Number(document.getElementById('gridKwhPrev').value||0);const now=Number(document.getElementById('gridKwhNow').value||0);document.getElementById('gridKwhDiff').value=Math.max(0,now-prev).toFixed(2);});});  </script>
+</body>
+</html>
