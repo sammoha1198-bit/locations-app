@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-  <title>تطبيق المواقع | مهمة / طارئة / تقارير</title>
+  <title>تطبيق المواقع | مهمة / تقارير</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -51,17 +51,13 @@
   </header>
 
   <main class="max-w-3xl mx-auto px-3 py-5 space-y-5">
-    <!-- Home (3 tiles) -->
+    <!-- Home (2 tiles) -->
     <section id="home" class="grid grid-cols-3 gap-4">
-      <div class="card tile p-5 hover:shadow-lg transition" onclick="openSection('mission')">
+      <div class="card tile p-5 hover:shadow-lg transition col-span-2 sm:col-span-1" onclick="openSection('mission')">
         <div class="text-xs text-slate-500">إدخال</div>
         <div class="text-lg sm:text-xl font-extrabold">المهمة</div>
       </div>
-      <div class="card tile p-5 hover:shadow-lg transition" onclick="openSection('emergency')">
-        <div class="text-xs text-slate-500">إدخال</div>
-        <div class="text-lg sm:text-xl font-extrabold">الصيانة الطارئة</div>
-      </div>
-      <div class="card tile p-5 hover:shadow-lg transition" onclick="openSection('reports')">
+      <div class="card tile p-5 hover:shadow-lg transition col-span-1" onclick="openSection('reports')">
         <div class="text-xs text-slate-500">تقارير</div>
         <div class="text-lg sm:text-xl font-extrabold">تقارير الاكسيل</div>
       </div>
@@ -100,13 +96,16 @@
 
           <div>
             <label class="label">تبعية الموقع</label>
-            <input id="ms-owner" list="ownerList" class="input" placeholder="حكومي / تجاري / خاص"/>
-            <datalist id="ownerList"><option value="حكومي"/><option value="تجاري"/><option value="خاص"/><option value="الأمانة"/></datalist>
+            <input id="ms-owner" list="ownerList" class="input" placeholder="المنطقة الأولى / الثانية / الثالثة ..."/>
+            <datalist id="ownerList">
+              <option value="المنطقة الأولى"/><option value="المنطقة الثانية"/><option value="المنطقة الثالثة"/>
+              <option value="المنطقة الرابعة"/><option value="المنطقة الخامسة"/>
+            </datalist>
           </div>
 
           <div class="sm:col-span-3">
             <label class="label">نوع العمل</label>
-            <select id="ms-jobType" class="input">
+            <select id="ms-jobType" class="input" onchange="toggleEmergencyFields()">
               <option value="">— اختر —</option>
               <option>صيانة مخططة</option><option>صيانة دورية</option><option>صيانة طارئة</option><option>صيانة تفقدية</option>
               <option>استلام طوارئ</option><option>تعطيل</option><option>استلام وتشغيل</option><option>ترحيل إنذارات</option>
@@ -119,7 +118,6 @@
             <textarea id="ms-summary" rows="2" class="input"></textarea>
           </div>
 
-          <!-- الحقول الجديدة المطلوبة (بدون تغيير الشكل العام، نفس الستايل) -->
           <div>
             <label class="label">المنفذ للعمل</label>
             <input id="ms-executor" class="input" placeholder="اسم المنفّذ"/>
@@ -134,12 +132,86 @@
           </div>
         </div>
 
+        <!-- Emergency (inline in mission) -->
+        <div id="emergency-inline" class="mt-4 hidden">
+          <div class="font-bold mb-1">بيانات الصيانة الطارئة</div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <!-- الإنذار -->
+            <div class="sm:col-span-1">
+              <label class="label">الإنذار</label>
+              <select id="em-inline-alarm" class="input" onchange="toggleOtherInput(this,'em-inline-alarm-other-wrap')">
+                <option value="">— اختر —</option>
+                <option>AC power off</option>
+                <option>DC under voltage</option>
+                <option>Out of service</option>
+                <option>Power module abnormal</option>
+                <option value="__OTHER__">أخرى (اكتب)</option>
+              </select>
+            </div>
+            <div class="sm:col-span-2 hidden" id="em-inline-alarm-other-wrap">
+              <label class="label">الإنذار — أخرى</label>
+              <input id="em-inline-alarm-other" class="input" placeholder="اكتب الإنذار"/>
+            </div>
+
+            <!-- مصدر البلاغ -->
+            <div class="sm:col-span-1">
+              <label class="label">مصدر البلاغ</label>
+              <select id="em-inline-source" class="input" onchange="toggleOtherInput(this,'em-inline-source-other-wrap')">
+                <option value="">— اختر —</option>
+                <option>مراقبة الشبكة</option>
+                <option>مسؤول الصيانة</option>
+                <option>حارس الموقع</option>
+                <option>المؤجر</option>
+                <option value="__OTHER__">أخرى (اكتب)</option>
+              </select>
+            </div>
+            <div class="sm:col-span-2 hidden" id="em-inline-source-other-wrap">
+              <label class="label">مصدر البلاغ — أخرى</label>
+              <input id="em-inline-source-other" class="input" placeholder="اكتب المصدر"/>
+            </div>
+
+            <!-- تصنيف المشكلة -->
+            <div class="sm:col-span-1">
+              <label class="label">تصنيف المشكلة</label>
+              <select id="em-inline-category" class="input" onchange="toggleOtherInput(this,'em-inline-category-other-wrap')">
+                <option value="">— اختر —</option>
+                <option>مولدات</option>
+                <option>موحدات</option>
+                <option>بطاريات</option>
+                <option>كهرباء</option>
+                <option>تحكم</option>
+                <option>منظمات</option>
+                <option>مكيفات</option>
+                <option>مشاكل فنية power</option>
+                <option>تراسل</option>
+                <option>ألياف</option>
+                <option>محطات</option>
+                <option>مشاكل خدمية</option>
+                <option>ديزل</option>
+                <option>مشاريع</option>
+                <option value="__OTHER__">أخرى (اكتب)</option>
+              </select>
+            </div>
+            <div class="sm:col-span-2 hidden" id="em-inline-category-other-wrap">
+              <label class="label">تصنيف المشكلة — أخرى</label>
+              <input id="em-inline-category-other" class="input" placeholder="اكتب التصنيف"/>
+            </div>
+
+            <!-- ملاحظات الطوارئ -->
+            <div class="sm:col-span-3">
+              <label class="label">ملاحظات الطوارئ</label>
+              <textarea id="em-inline-notes" rows="2" class="input" placeholder="مثلاً: متعهد الديزل أبلغ أن المولد طافي/يوجد تسريب..."></textarea>
+            </div>
+          </div>
+        </div>
+
         <!-- Inner tabs -->
-        <div class="mt-3 flex gap-3 overflow-x-auto pb-1">
-          <button class="tab btn active" id="tab-oil"   onclick="showPane(event,'oil')">الزيت</button>
-          <button class="tab btn"         id="tab-loads" onclick="showPane(event,'loads')">القراءات/الأحمال</button>
-          <button class="tab btn"         id="tab-spares"onclick="showPane(event,'spares')">قطع الغيار</button>
-          <button class="tab btn"         id="tab-grid"  onclick="showPane(event,'grid')">العمومي/التجاري</button>
+        <div class="mt-4 flex gap-3 overflow-x-auto pb-1">
+          <button class="tab btn active" id="tab-oil"     onclick="showPane(event,'oil')">الزيت</button>
+          <button class="tab btn"         id="tab-loads"   onclick="showPane(event,'loads')">القراءات/الأحمال</button>
+          <button class="tab btn"         id="tab-spares"  onclick="showPane(event,'spares')">قطع الغيار</button>
+          <button class="tab btn"         id="tab-grid"    onclick="showPane(event,'grid')">العمومي/التجاري</button>
+          <button class="tab btn"         id="tab-clean"   onclick="showPane(event,'clean')">أعمال النظافة</button>
         </div>
 
         <div class="mt-3">
@@ -236,6 +308,21 @@
             </div>
             <p class="text-xs text-slate-500 mt-1">* تُستدعى القراءة السابقة تلقائيًا عند اختيار الموقع + النوع.</p>
           </div>
+
+          <!-- Cleaning -->
+          <div id="pane-clean" class="hidden">
+            <div class="font-bold mb-1">أعمال النظافة</div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="label">اسم القائم بالعمل</label>
+                <input id="cln-worker" class="input" placeholder="الاسم"/>
+              </div>
+              <div class="sm:col-span-2">
+                <label class="label">أعمال النظافة التي قام بها</label>
+                <textarea id="cln-works" rows="2" class="input" placeholder="تفاصيل الأعمال"></textarea>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="flex justify-between items-center mt-5 gap-2 flex-wrap">
@@ -248,47 +335,8 @@
       </div>
     </section>
 
-    <!-- Emergency -->
-    <!-- (بدون تغييرات شكلية) -->
-    <section id="section-emergency" class="card p-0 hidden">
-      <!-- ... نفس كودك تمامًا ... -->
-      <div class="px-4 pt-4 pb-3 border-b flex items-center justify-between">
-        <h2 class="text-lg font-extrabold">الصيانة الطارئة</h2>
-        <button class="text-sm text-burgundy-600" onclick="backHome()">رجوع</button>
-      </div>
-      <div class="p-4">
-        <form id="emForm" class="grid grid-cols-1 sm:grid-cols-2 gap-3" onsubmit="saveEmergency(event)">
-          <div><label class="label">التاريخ</label><input id="em-date" type="date" class="input"/></div>
-          <div><label class="label">المنطقة</label>
-            <select id="em-region" class="input"><option value="">— اختر —</option><option>الأمانة</option><option>صنعاء</option><option>مأرب</option><option>عمران</option></select>
-          </div>
-          <div class="sm:col-span-2 relative">
-            <label class="label">الموقع</label>
-            <input id="em-site" class="input" placeholder="اكتب 3 أحرف للبحث" oninput="filterSites(this,'emSiteListWrap')" autocomplete="off"/>
-            <div id="emSiteListWrap" class="combobox-list hidden"></div>
-          </div>
-          <div><label class="label">الإنذار</label>
-            <select id="em-alarm" class="input">
-              <option value="">— اختر —</option>
-              <option>AC Power Off</option><option>المراقبة</option><option>خروج عن الخدمة</option>
-            </select>
-          </div>
-          <div><label class="label">مصدر البلاغ</label>
-            <select id="em-source" class="input"><option value="">— اختر —</option><option>المراقبة</option><option>مشاكل فنية</option><option>أخرى</option></select>
-          </div>
-          <div><label class="label">تصنيف المشكلة</label>
-            <select id="em-category" class="input"><option value="">— اختر —</option><option>كهرباء عمومي</option><option>مشاكل فنية</option><option>تجاري</option></select>
-          </div>
-          <div class="sm:col-span-2"><label class="label">ملاحظات</label><textarea id="em-notes" rows="2" class="input"></textarea></div>
-          <div class="sm:col-span-2 flex justify-end"><button class="btn-primary" type="submit">حفظ الطوارئ + مزامنة</button></div>
-        </form>
-      </div>
-    </section>
-
     <!-- Reports -->
-    <!-- (بدون تغييرات شكلية) -->
     <section id="section-reports" class="card p-0 hidden">
-      <!-- ... نفس كودك تمامًا ... -->
       <div class="px-4 pt-4 pb-3 border-b flex items-center justify-between">
         <h2 class="text-lg font-extrabold">تقارير الاكسيل</h2>
         <button class="text-sm text-burgundy-600" onclick="backHome()">رجوع</button>
@@ -323,11 +371,20 @@
     }
     function showPane(e, which){
       e.preventDefault();
-      ['oil','loads','spares','grid'].forEach(id=>{
+      ['oil','loads','spares','grid','clean'].forEach(id=>{
         document.getElementById('pane-'+id).classList.toggle('hidden', id!==which);
-        document.getElementById('tab-'+id).classList.toggle('active', id===which);
+        document.getElementById('tab-'+id)?.classList.toggle('active', id===which);
       });
       if(which==='grid'){ fillGridPrev(); }
+    }
+    function toggleOtherInput(sel, wrapId){
+      const wrap=document.getElementById(wrapId);
+      if(!wrap) return;
+      wrap.classList.toggle('hidden', sel.value!=='__OTHER__');
+    }
+    function toggleEmergencyFields(){
+      const jt=document.getElementById('ms-jobType').value.trim();
+      document.getElementById('emergency-inline').classList.toggle('hidden', jt!=='صيانة طارئة');
     }
 
     const weekdayNames=['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
@@ -335,7 +392,6 @@
     function initDates(){
       const d1=document.getElementById('ms-date'); if(d1 && !d1.value) d1.value=todayISO();
       const w=document.getElementById('ms-weekday'); if(w) w.value=weekdayNames[new Date().getDay()];
-      const d2=document.getElementById('em-date'); if(d2 && !d2.value) d2.value=todayISO();
     }
 
     // ---------- Sites (searchable) ----------
@@ -366,7 +422,7 @@
 
     const DB={
       works:JSON.parse(localStorage.getItem('works')||'[]'),
-      emergencies:JSON.parse(localStorage.getItem('emergencies')||'[]'),
+      emergencies:JSON.parse(localStorage.getItem('emergencies')||'[]'), // للإبقاء على التوافق القديم (غير مستخدمة الآن)
       grid:JSON.parse(localStorage.getItem('grid')||'[]'),
       lastHoursBySite:JSON.parse(localStorage.getItem('lastHoursBySite')||'{}'),
       lastKwhBySiteType:JSON.parse(localStorage.getItem('lastKwhBySiteType')||'{}'),
@@ -387,7 +443,7 @@
     }
 
     // ---------- Mission buffers ----------
-    const BUF={ oil:{liters:0,fo:false,fd:false,fa:false}, loads:{hoursNow:0,l1:0,l2:0,l3:0,kwhNow:0}, spares:[], grid:null };
+    const BUF={ oil:{liters:0,fo:false,fd:false,fa:false}, loads:{hoursNow:0,l1:0,l2:0,l3:0,kwhNow:0}, spares:[], grid:null, cleaning:null, emergency:null };
 
     function readOilInputs(){
       BUF.oil.liters = Number(document.getElementById('oil-liters').value||0);
@@ -425,6 +481,7 @@
       BUF.spares = items;
     }
 
+    // Grid snapshot
     function keySiteType(site, typ){return `${site}__${typ}`;}
     function fillGridPrev(){
       const site=document.getElementById('ms-site').value.trim();
@@ -464,6 +521,30 @@
       };
     }
 
+    // Cleaning
+    function readCleaning(){
+      const worker=(document.getElementById('cln-worker').value||'').trim();
+      const works=(document.getElementById('cln-works').value||'').trim();
+      BUF.cleaning = (worker||works) ? { worker, works } : null;
+    }
+
+    // Emergency (inline)
+    function readEmergencyInline(){
+      const jt=document.getElementById('ms-jobType').value.trim();
+      if(jt!=='صيانة طارئة'){ BUF.emergency=null; return; }
+      let alarm=document.getElementById('em-inline-alarm').value;
+      if(alarm==='__OTHER__') alarm=(document.getElementById('em-inline-alarm-other').value||'').trim();
+
+      let source=document.getElementById('em-inline-source').value;
+      if(source==='__OTHER__') source=(document.getElementById('em-inline-source-other').value||'').trim();
+
+      let category=document.getElementById('em-inline-category').value;
+      if(category==='__OTHER__') category=(document.getElementById('em-inline-category-other').value||'').trim();
+
+      const notes=(document.getElementById('em-inline-notes').value||'').trim();
+      BUF.emergency = { alarm, source, category, notes };
+    }
+
     async function saveMission(){
       const date=document.getElementById('ms-date').value;
       const weekday=document.getElementById('ms-weekday').value;
@@ -478,7 +559,7 @@
 
       if(!region || !site || !jobType){ alert('الرجاء تعبئة المنطقة + الموقع + نوع العمل'); return; }
 
-      readOilInputs(); readLoadsInputs(); readSpares(); readGridInputs();
+      readOilInputs(); readLoadsInputs(); readSpares(); readGridInputs(); readCleaning(); readEmergencyInline();
 
       const keyRS = siteKey(region, site);
       const lastHours = Number(DB.lastHoursBySite[keyRS]||0);
@@ -491,6 +572,8 @@
         loads:{...BUF.loads, hoursDiff:diffHours},
         spares: BUF.spares.slice(),
         grid: BUF.grid ? {...BUF.grid} : null,
+        cleaning: BUF.cleaning,     // لا تصدير إكسيل حالياً
+        emergency: BUF.emergency,   // تُصدر داخل detail عند jobType=صيانة طارئة
 
         oilLiters:Number(BUF.oil.liters||0),
         oilFilter:!!BUF.oil.fo, dieselFilter:!!BUF.oil.fd, airFilter:!!BUF.oil.fa,
@@ -515,38 +598,31 @@
       alert('تم حفظ المهمة + المزامنة وتحديث بيانات التقارير.');
     }
 
-    // زر مسح الحقول كما طلبت
+    // زر مسح الحقول
     function clearMissionForm(){
-      // لا نمس التاريخ/اليوم ليستمر تدفق اليوم الحالي، نمسح الباقي:
       ['ms-region','ms-site','ms-owner','ms-jobType','ms-summary','ms-executor','ms-driver','ms-notes'].forEach(id=>{
         const el=document.getElementById(id); if(!el) return;
         if(el.tagName==='SELECT'){ el.selectedIndex = 0; } else { el.value=''; }
       });
-      // تبويبات الداخل:
+      // Emergency inline
+      document.getElementById('emergency-inline').classList.add('hidden');
+      ['em-inline-alarm-other-wrap','em-inline-source-other-wrap','em-inline-category-other-wrap'].forEach(id=>{
+        const w=document.getElementById(id); if(w) w.classList.add('hidden');
+      });
+      ['em-inline-alarm','em-inline-source','em-inline-category','em-inline-alarm-other','em-inline-source-other','em-inline-category-other','em-inline-notes'].forEach(id=>{
+        const el=document.getElementById(id); if(el) el.value='';
+      });
+
+      // Tabs
       document.getElementById('oil-liters').value='';
       ['oil-fo','oil-fd','oil-fa'].forEach(id=>document.getElementById(id).checked=false);
       ['ld-hours','ld-l1','ld-l2','ld-l3','ld-kwh'].forEach(id=>document.getElementById(id).value='');
       document.getElementById('spares-wrap').innerHTML='';
       ['gr-type','gr-prev','gr-now','gr-kwhr','gr-hours','gr-diff'].forEach(id=>{const el=document.getElementById(id); if(el){el.value='';}});
+      ['cln-worker','cln-works'].forEach(id=>{const el=document.getElementById(id); if(el){el.value='';}});
     }
 
-    async function saveEmergency(e){
-      e.preventDefault();
-      const date=document.getElementById('em-date').value;
-      const region=document.getElementById('em-region').value;
-      const site=document.getElementById('em-site').value.trim();
-      const alarm=document.getElementById('em-alarm').value;
-      const source=document.getElementById('em-source').value;
-      const category=document.getElementById('em-category').value;
-      const notes=document.getElementById('em-notes').value;
-      if(!region || !site){ alert('الرجاء تعبئة المنطقة + الموقع'); return; }
-      DB.emergencies.push({date, region, site, alarm, source, category, notes, savedAt:new Date().toISOString()});
-      persist();
-      await syncAll();
-      alert('تم حفظ الصيانة الطارئة + المزامنة.');
-      document.getElementById('emForm').reset(); initDates();
-    }
-
+    // Reports (local preview only)
     function ym(s){return (s||'').slice(0,7)}
     function buildLocalSummary(){
       const m=document.getElementById('monthPicker').value;
@@ -559,58 +635,43 @@
       const oil=works.reduce((a,b)=>a+Number(b.oilLiters||0),0);
       const hrs=works.reduce((a,b)=>a+Number(b.hoursDiff||0),0);
       let html=`<div class='mb-2 font-bold'>ملخص أعمال الصيانة لشهر ${m}</div>`;
-      html+=`<div class='overflow-auto'><table class='min-w-full text-sm border border-slate-200'><thead><tr class='bg-mint-100'><th class='p-2 border'>المهام</th><th class='p-2 border'>الكل</th>${byRegion.map(r=>`<th class='p-2 border'>${r}</th>`).join('')}</tr></thead><tbody>`;
+      html+=`<div class='overflow-auto'><table class='min-w-full text-sm border border-sكتate-200'><thead><tr class='bg-mint-100'><th class='p-2 border'>المهام</th><th class='p-2 border'>الكل</th>${byRegion.map(r=>`<th class='p-2 border'>${r}</th>`).join('')}</tr></thead><tbody>`;
       Object.keys(table).forEach(j=>{const r=table[j]; html+=`<tr><td class='p-2 border'>${j}</td><td class='p-2 border text-center'>${r.total}</td>${byRegion.map(x=>`<td class='p-2 border text-center'>${r[x]}</td>`).join('')}</tr>`});
       html+=`</tbody></table></div>`;
       html+=`<div class='mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3'><div class='card p-3'><div class='text-xs text-slate-500'>مجموع ساعات عمل المولدات</div><div class='text-xl font-extrabold'>${hrs.toFixed(1)} ساعة</div></div><div class='card p-3'><div class='text-xs text-slate-500'>كميات الزيوت المستهلكة</div><div class='text-xl font-extrabold'>${oil.toFixed(2)} لتر</div></div></div>`;
       document.getElementById('summaryBox').innerHTML=html;
     }
 
-  function isMobileDirectDownloadNeeded(){
-    const ua = navigator.userAgent || navigator.vendor || window.opera;
-    const iOS = /iPad|iPhone|iPod/.test(ua);
-    const isAndroid = /Android/.test(ua);
-    const isMobile = iOS || isAndroid;
-    const isSafari = /^((?!chrome|android).)*safari/i.test(ua);
-    // open link directly on mobile (most reliable)
-    return isMobile && (isSafari || true);
-  }
-
-  async function exportExcel(kind){
-    const month=document.getElementById('monthPicker').value;
-    if(!month){alert('اختر شهرًا'); return;}
-    await syncAll();
-
-    const url = `/export/${kind}?month=${encodeURIComponent(month)}`;
-
-    // Mobile: open the URL directly so the browser handles the download natively
-    if (isMobileDirectDownloadNeeded()){
+    // Mobile-friendly Excel download
+    function isMobileDirectDownloadNeeded(){
+      const ua = navigator.userAgent || navigator.vendor || window.opera;
+      const iOS = /iPad|iPhone|iPod/.test(ua);
+      const isAndroid = /Android/.test(ua);
+      const isMobile = iOS || isAndroid;
+      const isSafari = /^((?!chrome|android).)*safari/i.test(ua);
+      return isMobile && (isSafari || true);
+    }
+    async function exportExcel(kind){
+      const month=document.getElementById('monthPicker').value;
+      if(!month){alert('اختر شهرًا'); return;}
+      await syncAll();
+      const url = `/export/${kind}?month=${encodeURIComponent(month)}`;
+      if (isMobileDirectDownloadNeeded()){
+        const a=document.createElement('a'); a.href=url; a.target='_blank'; a.rel='noopener';
+        document.body.appendChild(a); a.click(); a.remove(); return;
+      }
+      const res=await fetch(url);
+      if(!res.ok){ const msg=await res.text(); alert('فشل التصدير: '+msg); return; }
+      const blob=await res.blob();
       const a=document.createElement('a');
-      a.href = url;
-      a.target = '_blank';
-      a.rel = 'noopener';
+      a.href=URL.createObjectURL(blob);
+      a.download = `${kind}-${month}.xlsx`;
       document.body.appendChild(a);
       a.click();
       a.remove();
-      return;
     }
 
-    // Desktop: keep the old blob method
-    const res=await fetch(url);
-    if(!res.ok){
-      const msg=await res.text();
-      alert('فشل التصدير: '+msg);
-      return;
-    }
-    const blob=await res.blob();
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(blob);
-    a.download = `${kind}-${month}.xlsx`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-  }
-
+    // ---------- Init ----------
     document.addEventListener('DOMContentLoaded', async ()=>{
       await loadSites(); initDates();
       document.getElementById('home').classList.remove('hidden');

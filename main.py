@@ -164,13 +164,11 @@ def _write_cell_safe(ws, r: int, c: int, value):
             if rng.min_row <= r <= rng.max_row and rng.min_col <= c <= rng.max_col:
                 ws.cell(rng.min_row, rng.min_col).value = value
                 return
-        # if no range is found, silently skip (avoids exceptions)
         return
     else:
         cell.value = value
 
-# -------- EXPORT: Detail --------
-# -------- EXPORT: Detail (safe: no header touch, strict ascending) --------
+# -------- EXPORT: Detail (safe: strict ascending + inline emergency) --------
 @app.get("/export/detail")
 def export_detail(month: str):
     works = _works_for_month(month)
@@ -192,7 +190,7 @@ def export_detail(month: str):
     except Exception:
         pass
 
-    # 2) map headers (contains/variants, like before)
+    # 2) map headers (contains/variants)
     header_map = {
         "index":["م"], "day":["اليوم"], "date":["التاريخ","تاريخ"], "region":["المنطقة","المنطقه"],
         "site":["الموقع"], "owner":["تبعية الموقع","تبعيةالموقع","التبعية"], "job":["نوع العمل","نوعالعمل"],
@@ -233,7 +231,7 @@ def export_detail(month: str):
         if "date" not in cols or "site" not in cols:
             raise HTTPException(500, "تعذر تحديد أعمدة (التاريخ/الموقع) في detail.xlsx — راجع صف العناوين.")
 
-    # 3) find real header row (where the date label sits)
+    # 3) find header row (where the date label sits)
     hdr_row = 1
     for rr in range(1, min(ws.max_row, 240) + 1):
         v = ws.cell(rr, cols["date"]).value
@@ -243,7 +241,7 @@ def export_detail(month: str):
 
     targets = list(set(cols.values()))
 
-    # 4) choose the first data row that is fully NOT merged across all target columns
+    # 4) first fully-unmerged data row
     r = _first_clear_row(ws, targets, hdr_row + 1)
 
     idx = 1
@@ -251,7 +249,7 @@ def export_detail(month: str):
     def key_rs(region: str, site: str) -> str:
         return f"{_norm(region)}__{_norm(site)}"
 
-    # 5) write works (each spare on its own row), always moving to next non-merged row
+    # 5) write works (each spare on its own row), moving to next non-merged row each time
     for w in works:
         region = (w.get("region") or "").strip()
         site   = (w.get("site") or "").strip()
@@ -281,19 +279,28 @@ def export_detail(month: str):
             "g_hours": g.get("hours",""),
         })
 
+        # ---- NEW: inline Emergency (from mission itself) when jobType == "صيانة طارئة"
+        em = w.get("emergency") or {}
+        if (w.get("jobType") or "").strip() == "صيانة طارئة" and em:
+            base.update({
+                "e_alarm":  em.get("alarm",""),
+                "e_source": em.get("source",""),
+                "e_cat":    em.get("category",""),
+                "e_type":   "",  # لا يوجد حقل نوع منفصل هنا
+            })
+        # ---- NEW END
+
         for sp in spares:
             row = base.copy()
             row["spare"] = sp.get("name","")
             row["qty"]   = sp.get("qty","")
-            # write only to non-merged data row
             for k, c in cols.items():
                 if k in row:
                     _write_cell_safe(ws, r, c, row[k])
-            # move to next unmerged row (so we never hit merged headers)
             r = _first_clear_row(ws, targets, r + 1)
         idx += 1
 
-    # 6) map rows to merge emergencies by (date,region,site)
+    # 6) map rows to merge emergency records (legacy) by (date,region,site)
     row_by_key = {}
     for rr in range(hdr_row + 1, r):
         dt = _norm(ws.cell(rr, cols.get("date",1)).value)[:10]
@@ -302,7 +309,7 @@ def export_detail(month: str):
         if dt or rg or st:
             row_by_key[(dt, rg, st)] = rr
 
-    # 7) write emergencies (same row if key matches; else append at next unmerged row)
+    # 7) write standalone emergencies (legacy), merging if key matches; else append
     for e in emerg:
         dt = (e.get("date","") or "")[:10]
         rg = (e.get("region") or "").strip()
