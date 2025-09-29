@@ -387,12 +387,41 @@
       document.getElementById('emergency-inline').classList.toggle('hidden', jt!=='صيانة طارئة');
     }
 
+    // --- ONLY CHANGE YOU ASKED FOR: weekday follows selected date ---
     const weekdayNames=['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
-    function todayISO(){const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
-    function initDates(){
-      const d1=document.getElementById('ms-date'); if(d1 && !d1.value) d1.value=todayISO();
-      const w=document.getElementById('ms-weekday'); if(w) w.value=weekdayNames[new Date().getDay()];
+
+    function todayISO(){
+      const d=new Date();
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     }
+
+    function syncWeekdayFromDate(){
+      const w = document.getElementById('ms-weekday');
+      const d = document.getElementById('ms-date')?.value;
+      if(!w) return;
+
+      if(!d){
+        w.value = weekdayNames[new Date().getDay()];
+        return;
+      }
+      const [y,m,dd] = d.split('-').map(Number);
+      const dt = new Date(y, (m||1)-1, dd||1);
+      if(!isNaN(dt)) w.value = weekdayNames[dt.getDay()];
+    }
+
+    function initDates(){
+      const d1=document.getElementById('ms-date');
+      if(d1 && !d1.value) d1.value=todayISO();
+      // keep weekday in sync with selected date
+      syncWeekdayFromDate();
+      if(d1){
+        d1.addEventListener('change', syncWeekdayFromDate);
+        d1.addEventListener('input',  syncWeekdayFromDate);
+      }
+      const d2=document.getElementById('em-date');
+      if(d2 && !d2.value) d2.value=todayISO();
+    }
+    // --- END OF THE ONLY CHANGE ---
 
     // ---------- Sites (searchable) ----------
     let SITE_LIST=[];
@@ -673,9 +702,11 @@
 
     // ---------- Init ----------
     document.addEventListener('DOMContentLoaded', async ()=>{
-      await loadSites(); initDates();
+      await loadSites(); 
+      initDates(); // weekday now follows the selected date
       document.getElementById('home').classList.remove('hidden');
-      const gt=document.getElementById('gr-type'); if(gt) gt.addEventListener('change', fillGridPrev);
+      const gt=document.getElementById('gr-type'); 
+      if(gt) gt.addEventListener('change', fillGridPrev);
     });
   </script>
 </body>
